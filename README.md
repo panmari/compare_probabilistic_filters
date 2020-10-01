@@ -9,5 +9,5 @@ Both have various implementations readily available. Here we're mainly intereste
 
 ## Results
 
-    steakknife/bloomfilter: fp=3, fp_rate=0.000651
-    seiflotfy/cuckoofilter: fp=137, fp_rate=0.029724
+    steakknife/bloomfilter: mem=11.715 MB fp=502, fp_rate=0.009804
+    seiflotfy/cuckoofilter: mem=15.999 MB fp=964, fp_rate=0.018828
