@@ -10,6 +10,7 @@ import (
 	"runtime"
 
 	"github.com/irfansharif/cfilter"
+	cuckooV2 "github.com/panmari/cuckoofilter"
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/steakknife/bloomfilter"
 )
@@ -31,6 +32,10 @@ func main() {
 		{
 			"seiflotfy/cuckoofilter",
 			testCuckoofilter,
+		},
+		{
+			"panmari/cuckoofilter",
+			testCuckoofilterV2,
 		},
 		// {
 		// 	// panic: runtime error: index out of range
@@ -62,6 +67,15 @@ func testBloomfilter(words []string) (fp, tn, mem int64) {
 func testCuckoofilter(words []string) (fp, tn, mem int64) {
 	memBefore := heapAllocs()
 	cf := cuckoo.NewFilter(uint(len(words) * wordListMultiplier))
+
+	insert := func(s string) { cf.Insert([]byte(s)) }
+	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
+	return testImplementation(words, memBefore, insert, contains)
+}
+
+func testCuckoofilterV2(words []string) (fp, tn, mem int64) {
+	memBefore := heapAllocs()
+	cf := cuckooV2.NewFilter(uint(len(words) * wordListMultiplier))
 
 	insert := func(s string) { cf.Insert([]byte(s)) }
 	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
