@@ -16,7 +16,7 @@ import (
 )
 
 // Inserts the size of wordlist times this items into the filters.
-const wordListMultiplier = 100
+const wordListMultiplier = 300
 
 func main() {
 	words := readWords()
@@ -54,7 +54,7 @@ func main() {
 
 func testBloomfilter(words []string) (fp, tn, mem int64) {
 	memBefore := heapAllocs()
-	bf, err := bloomfilter.NewOptimal(uint64(len(words)*wordListMultiplier), 0.01)
+	bf, err := bloomfilter.NewOptimal(uint64(len(words)*wordListMultiplier), 0.0002)
 	if err != nil {
 		log.Fatalf("failed creating bloom filter with size %d: %v", len(words), err)
 	}
