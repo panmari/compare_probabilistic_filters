@@ -9,6 +9,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/AndreasBriese/bbloom"
 	"github.com/irfansharif/cfilter"
 	cuckooV2 "github.com/panmari/cuckoofilter"
 	cuckoo "github.com/seiflotfy/cuckoofilter"
@@ -28,6 +29,10 @@ func main() {
 		{
 			"steakknife/bloomfilter",
 			testBloomfilter,
+		},
+		{
+			"AndreasBriese/bbloom",
+			testBbloom,
 		},
 		{
 			"seiflotfy/cuckoofilter",
@@ -61,6 +66,15 @@ func testBloomfilter(words []string) (fp, tn, mem int64) {
 
 	insert := func(s string) { bf.Add(bloomHash(s)) }
 	contains := func(s string) bool { return bf.Contains(bloomHash(s)) }
+	return testImplementation(words, memBefore, insert, contains)
+}
+
+func testBbloom(words []string) (fp, tn, mem int64) {
+	memBefore := heapAllocs()
+	bf := bbloom.New(float64(len(words)*wordListMultiplier), 0.002)
+
+	insert := func(s string) { bf.Add([]byte(s)) }
+	contains := func(s string) bool { return bf.Has([]byte(s)) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 

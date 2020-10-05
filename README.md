@@ -15,7 +15,8 @@ offer to configure a target false positive rate (e.g. `bloomfilter.NewOptimal(ma
 Results for `wordListMultiplier = 300`:
 
 ```bash
-steakknife/bloomfilter: mem=64.928 MB fp=28, fp_rate=0.000182
+steakknife/bloomfilter: mem=64.926 MB fp=20, fp_rate=0.000130
+AndreasBriese/bbloom: mem=63.999 MB fp=42, fp_rate=0.000273
 seiflotfy/cuckoofilter: mem=31.999 MB fp=4326, fp_rate=0.028164
 panmari/cuckoofilter: mem=61.679 MB fp=24, fp_rate=0.000156
 ```
