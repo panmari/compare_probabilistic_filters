@@ -25,26 +25,29 @@ panmari/cuckoofilter: mem=61.679 MB fp=24, fp_rate=0.000156
 
 ### Insert
 
-Time for 500 inserts.
+Time for constructing a filter with 500 elements.
 
 ```
-BenchmarkInsertBloom-4                      7716            172887 ns/op
-BenchmarkInsertCuckoo-4                     5728            209894 ns/op
-BenchmarkInsertCuckooV2-4                  24951             51050 ns/op
+BenchmarkInsertBloomFilter-4                8884            134940 ns/op
+BenchmarkInsertBBloom-4                    37064             31784 ns/op
+BenchmarkInsertCuckoo-4                     5706            200611 ns/op
+BenchmarkInsertCuckooV2-4                  25261             47125 ns/op
 ```
 
 ### Lookup for a contained item
 
 ```
-BenchmarkContainsTrueBloom-4                9163            140708 ns/op
-BenchmarkContainsTrueCuckoo-4              48384             23680 ns/op
-BenchmarkContainsTrueCuckooV2-4            33484             36829 ns/op
+BenchmarkContainsTrueBloom-4                8960            125152 ns/op
+BenchmarkContainsTrueBBloom-4              38833             31392 ns/op
+BenchmarkContainsTrueCuckoo-4              50750             23198 ns/op
+BenchmarkContainsTrueCuckooV2-4            34770             34430 ns/op
 ```
 
 ### Lookup for a missing item
 
 ```
-BenchmarkContainsFalseBloom-4               8449            150120 ns/op
-BenchmarkContainsFalseCuckoo-4             48962             24183 ns/op
-BenchmarkContainsFalseCuckooV2-4           33981             34827 ns/op
+BenchmarkContainsFalseBloom-4               9186            127424 ns/op
+BenchmarkContainsFalseBBloom-4             41846             27788 ns/op
+BenchmarkContainsFalseCuckoo-4             50150             23507 ns/op
+BenchmarkContainsFalseCuckooV2-4           35347             33960 ns/op
 ```

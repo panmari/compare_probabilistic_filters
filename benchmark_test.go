@@ -1,3 +1,6 @@
+// Benchmark for thread-unsafe interactions with probabilistic filters.
+// Note that github.com/steakknife/bloomfilter doesn't allow interacting
+// in a thread-unsafe way, leading to higher numbers there.
 package main
 
 import (
@@ -6,6 +9,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/AndreasBriese/bbloom"
 	cuckooV2 "github.com/panmari/cuckoofilter"
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/steakknife/bloomfilter"
@@ -32,11 +36,20 @@ func init() {
 	}
 }
 
-func BenchmarkInsertBloom(b *testing.B) {
+func BenchmarkInsertBloomFilter(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.001)
 		for _, w := range words {
 			f.Add(bloomHash(w))
+		}
+	}
+}
+
+func BenchmarkInsertBBloom(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		f := bbloom.New(float64(numWords), 0.001)
+		for _, w := range words {
+			f.Add([]byte(w))
 		}
 	}
 }
@@ -68,6 +81,19 @@ func BenchmarkContainsTrueBloom(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, w := range words {
 			f.Contains(bloomHash(w))
+		}
+	}
+}
+
+func BenchmarkContainsTrueBBloom(b *testing.B) {
+	f := bbloom.New(float64(numWords), 0.001)
+	for _, w := range words {
+		f.Add([]byte(w))
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, w := range words {
+			f.Has([]byte(w))
 		}
 	}
 }
@@ -107,6 +133,19 @@ func BenchmarkContainsFalseBloom(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, w := range otherWords {
 			f.Contains(bloomHash(w))
+		}
+	}
+}
+
+func BenchmarkContainsFalseBBloom(b *testing.B) {
+	f := bbloom.New(float64(numWords), 0.001)
+	for _, w := range words {
+		f.Add([]byte(w))
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, w := range otherWords {
+			f.Has([]byte(w))
 		}
 	}
 }
