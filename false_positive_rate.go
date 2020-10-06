@@ -24,7 +24,7 @@ func main() {
 
 	testCases := []struct {
 		name       string
-		testFilter func([]string) (int64, int64, int64)
+		testFilter func([]string) filterStats
 	}{
 		{
 			"steakknife/bloomfilter",
@@ -49,15 +49,19 @@ func main() {
 		// },
 	}
 	for _, tc := range testCases {
-		fp, tn, mem := tc.testFilter(words)
-		fpRate := float64(fp) / (float64(fp + tn))
+		stats := tc.testFilter(words)
+		fpRate := float64(stats.fp) / (float64(stats.fp + stats.tn))
 		const megabyte = 1 << 20
-		memMB := float64(mem) / float64(megabyte)
-		fmt.Printf("%s: mem=%.3f MB fp=%d, fp_rate=%f\n", tc.name, memMB, fp, fpRate)
+		memMB := float64(stats.mem) / float64(megabyte)
+		fmt.Printf("%s: mem=%.3f MB, fn=%d, fp=%d, fp_rate=%f\n", tc.name, memMB, stats.fn, stats.fp, fpRate)
 	}
 }
 
-func testBloomfilter(words []string) (fp, tn, mem int64) {
+type filterStats struct {
+	tp, fp, tn, fn, mem int64
+}
+
+func testBloomfilter(words []string) filterStats {
 	memBefore := heapAllocs()
 	bf, err := bloomfilter.NewOptimal(uint64(len(words)*wordListMultiplier), 0.0002)
 	if err != nil {
@@ -69,7 +73,7 @@ func testBloomfilter(words []string) (fp, tn, mem int64) {
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testBbloom(words []string) (fp, tn, mem int64) {
+func testBbloom(words []string) filterStats {
 	memBefore := heapAllocs()
 	bf := bbloom.New(float64(len(words)*wordListMultiplier), 0.002)
 
@@ -78,7 +82,7 @@ func testBbloom(words []string) (fp, tn, mem int64) {
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCuckoofilter(words []string) (fp, tn, mem int64) {
+func testCuckoofilter(words []string) filterStats {
 	memBefore := heapAllocs()
 	cf := cuckoo.NewFilter(uint(len(words) * wordListMultiplier))
 
@@ -87,7 +91,7 @@ func testCuckoofilter(words []string) (fp, tn, mem int64) {
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCuckoofilterV2(words []string) (fp, tn, mem int64) {
+func testCuckoofilterV2(words []string) filterStats {
 	memBefore := heapAllocs()
 	cf := cuckooV2.NewFilter(uint(len(words) * wordListMultiplier))
 
@@ -96,7 +100,7 @@ func testCuckoofilterV2(words []string) (fp, tn, mem int64) {
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCfilter(words []string) (fp, tn, mem int64) {
+func testCfilter(words []string) filterStats {
 	memBefore := heapAllocs()
 
 	cf := cfilter.New(cfilter.Size(uint(len(words) * wordListMultiplier)))
@@ -107,10 +111,11 @@ func testCfilter(words []string) (fp, tn, mem int64) {
 }
 
 func testImplementation(words []string, memBefore uint64,
-	insert func(string), contains func(string) bool) (fp, tn, mem int64) {
+	insert func(string), contains func(string) bool) filterStats {
 	skip := func(i, j int) bool { return (i+j)%200 == 0 }
 	for i, w1 := range words {
-		for j, w2 := range words[0:wordListMultiplier] {
+		insert(w1)
+		for j, w2 := range append(words[0:wordListMultiplier]) {
 			if !skip(i, j) {
 				w := w1 + w2
 				insert(w)
@@ -118,7 +123,9 @@ func testImplementation(words []string, memBefore uint64,
 		}
 	}
 	memAfter := heapAllocs()
-	mem = int64(memAfter - memBefore)
+	stats := filterStats{
+		mem: int64(memAfter - memBefore),
+	}
 
 	// Construct non-contained words in a second step in order to not influence
 	// memory measurement above.
@@ -134,12 +141,19 @@ func testImplementation(words []string, memBefore uint64,
 
 	for _, w := range remaining {
 		if contains(w) {
-			fp++
+			stats.fp++
 		} else {
-			tn++
+			stats.tn++
 		}
 	}
-	return fp, tn, mem
+	for _, w := range words {
+		if contains(w) {
+			stats.tp++
+		} else {
+			stats.fn++
+		}
+	}
+	return stats
 }
 
 func readWords() []string {
