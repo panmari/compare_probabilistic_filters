@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"hash"
 	"hash/fnv"
@@ -18,7 +19,9 @@ import (
 )
 
 // Inserts the size of wordlist times this items into the filters.
-const wordListMultiplier = 250
+var (
+	wordListMultiplier = flag.Int("word_list_multiplier", 250, "Determines the number of inserted items.")
+)
 
 func main() {
 	words := readWords()
@@ -57,8 +60,8 @@ func main() {
 		fpRate := float64(stats.fp) / (float64(stats.fp + stats.tn))
 		const megabyte = 1 << 20
 		memMB := float64(stats.mem) / float64(megabyte)
-		fmt.Printf("%s: mem=%.3f MB, insertFailed=%d, fn=%d, fp=%d, fp_rate=%f\n",
-			tc.name, memMB, stats.insertFailed, stats.fn, stats.fp, fpRate)
+		fmt.Printf("%s: size=%d, mem=%.3f MB, insertFailed=%d, fn=%d, fp=%d, fp_rate=%f\n",
+			tc.name, len(words), memMB, stats.insertFailed, stats.fn, stats.fp, fpRate)
 	}
 }
 
@@ -66,9 +69,13 @@ type filterStats struct {
 	insertFailed, tp, fp, tn, fn, mem int64
 }
 
+func filterSize(words []string) int {
+	return len(words) * (*wordListMultiplier + 1)
+}
+
 func testBloomfilter(words []string) filterStats {
 	memBefore := heapAllocs()
-	bf, err := bloomfilter.NewOptimal(uint64(len(words)*(wordListMultiplier+1)), 0.0001)
+	bf, err := bloomfilter.NewOptimal(uint64(filterSize(words)), 0.0001)
 	if err != nil {
 		log.Fatalf("failed creating bloom filter with size %d: %v", len(words), err)
 	}
@@ -80,7 +87,7 @@ func testBloomfilter(words []string) filterStats {
 
 func testBbloom(words []string) filterStats {
 	memBefore := heapAllocs()
-	bf := bbloom.New(float64(len(words)*(wordListMultiplier+1)), 0.002)
+	bf := bbloom.New(float64(filterSize(words)), 0.002)
 
 	insert := func(s string) bool { bf.Add([]byte(s)); return true }
 	contains := func(s string) bool { return bf.Has([]byte(s)) }
@@ -89,7 +96,7 @@ func testBbloom(words []string) filterStats {
 
 func testCuckoofilter(words []string) filterStats {
 	memBefore := heapAllocs()
-	cf := cuckoo.NewFilter(uint(len(words) * (wordListMultiplier + 1)))
+	cf := cuckoo.NewFilter(uint(filterSize(words)))
 
 	insert := func(s string) bool { return cf.Insert([]byte(s)) }
 	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
@@ -98,7 +105,7 @@ func testCuckoofilter(words []string) filterStats {
 
 func testCuckoofilterV2(words []string) filterStats {
 	memBefore := heapAllocs()
-	cf := cuckooV2.NewFilter(uint(len(words) * (wordListMultiplier + 1)))
+	cf := cuckooV2.NewFilter(uint(filterSize(words)))
 
 	insert := func(s string) bool { return cf.Insert([]byte(s)) }
 	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
@@ -107,7 +114,7 @@ func testCuckoofilterV2(words []string) filterStats {
 
 func testCuckoofilterVed(words []string) filterStats {
 	memBefore := heapAllocs()
-	cf := cuckooVed.NewFilter(uint32(len(words) * (wordListMultiplier + 1)))
+	cf := cuckooVed.NewFilter(uint32(filterSize(words)))
 
 	insert := func(s string) bool { return cf.Insert([]byte(s)) }
 	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
@@ -117,7 +124,7 @@ func testCuckoofilterVed(words []string) filterStats {
 func testCfilter(words []string) filterStats {
 	memBefore := heapAllocs()
 
-	cf := cfilter.New(cfilter.Size(uint(len(words) * (wordListMultiplier + 1))))
+	cf := cfilter.New(cfilter.Size(uint(filterSize(words))))
 
 	insert := func(s string) bool { return cf.Insert([]byte(s)) }
 	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
@@ -129,7 +136,7 @@ func testImplementation(words []string, memBefore uint64,
 	skip := func(i, j int) bool { return (i+j)%200 == 0 }
 	for i, w1 := range words {
 		insert(w1)
-		for j, w2 := range append(words[0:wordListMultiplier]) {
+		for j, w2 := range append(words[0:*wordListMultiplier]) {
 			if !skip(i, j) {
 				w := w1 + w2
 				if ok := insert(w); !ok {
@@ -145,7 +152,7 @@ func testImplementation(words []string, memBefore uint64,
 	// memory measurement above.
 	remaining := make([]string, 0, len(words)/200)
 	for i, w1 := range words {
-		for j, w2 := range words[0:wordListMultiplier] {
+		for j, w2 := range words[0:*wordListMultiplier] {
 			w := w1 + w2
 			if skip(i, j) {
 				remaining = append(remaining, w)
