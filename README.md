@@ -1,5 +1,7 @@
 # Comparing probabilistic set membership datastructures
 
+NOTE: There's [a writeup](https://panmari.github.io/2020/10/09/probabilistic-filter-golang.html) using the results generated from this repo.
+
 Most notable contenders in this category are
 
 * Bloom filters
@@ -28,26 +30,29 @@ panmari/cuckoofilter: mem=61.679 MB fp=24, fp_rate=0.000156
 Time for constructing a filter with 500 elements.
 
 ```
-BenchmarkInsertBloomFilter-4                8884            134940 ns/op
-BenchmarkInsertBBloom-4                    37064             31784 ns/op
-BenchmarkInsertCuckoo-4                     5706            200611 ns/op
-BenchmarkInsertCuckooV2-4                  25261             47125 ns/op
+BenchmarkInsertBloomFilter-4                        6692            169984 ns/op
+BenchmarkInsertBBloom-4                            37878             30963 ns/op
+BenchmarkInsertSeiflotfyCuckoo-4                   27488             43272 ns/op
+BenchmarkInsertPanmariCuckoo-4                     61988             18910 ns/op
+BenchmarkInsertVedhavyasCuckoo-4                    5964            177837 ns/op
 ```
 
 ### Lookup for a contained item
 
 ```
-BenchmarkContainsTrueBloom-4                8960            125152 ns/op
-BenchmarkContainsTrueBBloom-4              38833             31392 ns/op
-BenchmarkContainsTrueCuckoo-4              50750             23198 ns/op
-BenchmarkContainsTrueCuckooV2-4            34770             34430 ns/op
+BenchmarkContainsTrueBloom-4                        7820            156934 ns/op
+BenchmarkContainsTrueBBloom-4                      39914             29274 ns/op
+BenchmarkContainsTrueSeiflotfyCuckoo-4             59832             19753 ns/op
+BenchmarkContainsTruePanmariCuckoo-4               49832             23859 ns/op
+BenchmarkContainsTrueVedhavyasCuckoo-4              8422            143366 ns/op
 ```
 
 ### Lookup for a missing item
 
 ```
-BenchmarkContainsFalseBloom-4               9186            127424 ns/op
-BenchmarkContainsFalseBBloom-4             41846             27788 ns/op
-BenchmarkContainsFalseCuckoo-4             50150             23507 ns/op
-BenchmarkContainsFalseCuckooV2-4           35347             33960 ns/op
+BenchmarkContainsFalseBloom-4                       7700            157848 ns/op
+BenchmarkContainsFalseBBloom-4                     42843             27156 ns/op
+BenchmarkContainsFalseSeiflotfyCuckoo-4            54796             21104 ns/op
+BenchmarkContainsFalsePanmariCuckoo-4              44841             26030 ns/op
+BenchmarkContainsFalseVedhavyasCuckoo-4             7436            149577 ns/op
 ```
