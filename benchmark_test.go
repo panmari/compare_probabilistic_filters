@@ -13,6 +13,7 @@ import (
 	cuckooV2 "github.com/panmari/cuckoofilter"
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/steakknife/bloomfilter"
+	cuckooVed "github.com/vedhavyas/cuckoo-filter"
 )
 
 var (
@@ -54,7 +55,7 @@ func BenchmarkInsertBBloom(b *testing.B) {
 	}
 }
 
-func BenchmarkInsertCuckoo(b *testing.B) {
+func BenchmarkInsertSeiflotfyCuckoo(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		f := cuckoo.NewFilter(uint(numWords))
 		for _, w := range words {
@@ -63,9 +64,18 @@ func BenchmarkInsertCuckoo(b *testing.B) {
 	}
 }
 
-func BenchmarkInsertCuckooV2(b *testing.B) {
+func BenchmarkInsertPanmariCuckoo(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		f := cuckooV2.NewFilter(uint(numWords))
+		for _, w := range words {
+			f.Insert([]byte(w))
+		}
+	}
+}
+
+func BenchmarkInsertVedhavyasCuckoo(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		f := cuckooVed.NewFilter(uint32(numWords))
 		for _, w := range words {
 			f.Insert([]byte(w))
 		}
@@ -98,7 +108,7 @@ func BenchmarkContainsTrueBBloom(b *testing.B) {
 	}
 }
 
-func BenchmarkContainsTrueCuckoo(b *testing.B) {
+func BenchmarkContainsTrueSeiflotfyCuckoo(b *testing.B) {
 	f := cuckoo.NewFilter(uint(numWords))
 	for _, w := range words {
 		f.Insert([]byte(w))
@@ -111,8 +121,21 @@ func BenchmarkContainsTrueCuckoo(b *testing.B) {
 	}
 }
 
-func BenchmarkContainsTrueCuckooV2(b *testing.B) {
+func BenchmarkContainsTruePanmariCuckoo(b *testing.B) {
 	f := cuckooV2.NewFilter(uint(numWords))
+	for _, w := range words {
+		f.Insert([]byte(w))
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, w := range words {
+			f.Lookup([]byte(w))
+		}
+	}
+}
+
+func BenchmarkContainsTrueVedhavyasCuckoo(b *testing.B) {
+	f := cuckooVed.NewFilter(uint32(numWords))
 	for _, w := range words {
 		f.Insert([]byte(w))
 	}
@@ -150,7 +173,7 @@ func BenchmarkContainsFalseBBloom(b *testing.B) {
 	}
 }
 
-func BenchmarkContainsFalseCuckoo(b *testing.B) {
+func BenchmarkContainsFalseSeiflotfyCuckoo(b *testing.B) {
 	f := cuckoo.NewFilter(uint(numWords))
 	for _, w := range words {
 		f.Insert([]byte(w))
@@ -163,8 +186,21 @@ func BenchmarkContainsFalseCuckoo(b *testing.B) {
 	}
 }
 
-func BenchmarkContainsFalseCuckooV2(b *testing.B) {
+func BenchmarkContainsFalsePanmariCuckoo(b *testing.B) {
 	f := cuckooV2.NewFilter(uint(numWords))
+	for _, w := range words {
+		f.Insert([]byte(w))
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, w := range otherWords {
+			f.Lookup([]byte(w))
+		}
+	}
+}
+
+func BenchmarkContainsFalseVedhavyasCuckoo(b *testing.B) {
+	f := cuckooVed.NewFilter(uint32(numWords))
 	for _, w := range words {
 		f.Insert([]byte(w))
 	}
