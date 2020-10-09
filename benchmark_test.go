@@ -39,7 +39,7 @@ func init() {
 
 func BenchmarkInsertBloomFilter(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.001)
+		f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.0001)
 		for _, w := range words {
 			f.Add(bloomHash(w))
 		}
@@ -48,7 +48,7 @@ func BenchmarkInsertBloomFilter(b *testing.B) {
 
 func BenchmarkInsertBBloom(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		f := bbloom.New(float64(numWords), 0.001)
+		f := bbloom.New(float64(numWords), 0.002)
 		for _, w := range words {
 			f.Add([]byte(w))
 		}
@@ -83,7 +83,7 @@ func BenchmarkInsertVedhavyasCuckoo(b *testing.B) {
 }
 
 func BenchmarkContainsTrueBloom(b *testing.B) {
-	f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.001)
+	f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.0001)
 	for _, w := range words {
 		f.Add(bloomHash(w))
 	}
@@ -96,7 +96,7 @@ func BenchmarkContainsTrueBloom(b *testing.B) {
 }
 
 func BenchmarkContainsTrueBBloom(b *testing.B) {
-	f := bbloom.New(float64(numWords), 0.001)
+	f := bbloom.New(float64(numWords), 0.002)
 	for _, w := range words {
 		f.Add([]byte(w))
 	}
@@ -148,7 +148,7 @@ func BenchmarkContainsTrueVedhavyasCuckoo(b *testing.B) {
 }
 
 func BenchmarkContainsFalseBloom(b *testing.B) {
-	f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.001)
+	f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.0001)
 	for _, w := range words {
 		f.Add(bloomHash(w))
 	}
@@ -161,7 +161,7 @@ func BenchmarkContainsFalseBloom(b *testing.B) {
 }
 
 func BenchmarkContainsFalseBBloom(b *testing.B) {
-	f := bbloom.New(float64(numWords), 0.001)
+	f := bbloom.New(float64(numWords), 0.002)
 	for _, w := range words {
 		f.Add([]byte(w))
 	}
