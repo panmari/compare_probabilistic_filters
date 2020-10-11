@@ -30,29 +30,29 @@ panmari/cuckoofilter: mem=61.679 MB fp=24, fp_rate=0.000156
 Time for constructing a filter with 500 elements.
 
 ```
-BenchmarkInsertBloomFilter-4                        6692            169984 ns/op
-BenchmarkInsertBBloom-4                            37878             30963 ns/op
-BenchmarkInsertSeiflotfyCuckoo-4                   27488             43272 ns/op
-BenchmarkInsertPanmariCuckoo-4                     61988             18910 ns/op
-BenchmarkInsertVedhavyasCuckoo-4                    5964            177837 ns/op
+InsertBloomFilter-4              165µs ± 2%
+InsertBBloom-4                  30.9µs ± 0%
+InsertSeiflotfyCuckoo-4         43.0µs ± 0%
+InsertPanmariCuckoo-4           18.9µs ± 1%
+InsertVedhavyasCuckoo-4          176µs ± 0%
 ```
 
 ### Lookup for a contained item
 
 ```
-BenchmarkContainsTrueBloom-4                        7820            156934 ns/op
-BenchmarkContainsTrueBBloom-4                      39914             29274 ns/op
-BenchmarkContainsTrueSeiflotfyCuckoo-4             59832             19753 ns/op
-BenchmarkContainsTruePanmariCuckoo-4               49832             23859 ns/op
-BenchmarkContainsTrueVedhavyasCuckoo-4              8422            143366 ns/op
+ContainsTrueBloom-4              150µs ± 1%
+ContainsTrueBBloom-4            29.0µs ± 1%
+ContainsTrueSeiflotfyCuckoo-4   19.9µs ± 2%
+ContainsTruePanmariCuckoo-4     16.7µs ± 0%
+ContainsTrueVedhavyasCuckoo-4    143µs ± 3%
 ```
 
 ### Lookup for a missing item
 
 ```
-BenchmarkContainsFalseBloom-4                       7700            157848 ns/op
-BenchmarkContainsFalseBBloom-4                     42843             27156 ns/op
-BenchmarkContainsFalseSeiflotfyCuckoo-4            54796             21104 ns/op
-BenchmarkContainsFalsePanmariCuckoo-4              44841             26030 ns/op
-BenchmarkContainsFalseVedhavyasCuckoo-4             7436            149577 ns/op
+ContainsFalseBloom-4             152µs ± 1%
+ContainsFalseBBloom-4           26.8µs ± 0%
+ContainsFalseSeiflotfyCuckoo-4  21.0µs ± 0%
+ContainsFalsePanmariCuckoo-4    24.7µs ± 0%
+ContainsFalseVedhavyasCuckoo-4   148µs ± 2%
 ```
