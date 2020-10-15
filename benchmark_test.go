@@ -37,88 +37,86 @@ func init() {
 	}
 }
 
-func BenchmarkInsertBloomFilter(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+func BenchmarkInsert(b *testing.B) {
+	b.Run("BloomFilter", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.0001)
+			for _, w := range words {
+				f.Add(bloomHash(w))
+			}
+		}
+	})
+	b.Run("BBloom", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			f := bbloom.New(float64(numWords), 0.002)
+			for _, w := range words {
+				f.Add([]byte(w))
+			}
+		}
+	})
+	b.Run("SeiflotfyCuckoo", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			f := cuckoo.NewFilter(uint(numWords))
+			for _, w := range words {
+				f.Insert([]byte(w))
+			}
+		}
+	})
+	b.Run("PanmariCuckoo", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			f := cuckooV2.NewFilter(uint(numWords))
+			for _, w := range words {
+				f.Insert([]byte(w))
+			}
+		}
+	})
+	b.Run("VedhavyasCuckoo", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			f := cuckooVed.NewFilter(uint32(numWords))
+			for _, w := range words {
+				f.Insert([]byte(w))
+			}
+		}
+	})
+}
+
+func BenchmarkContainsTrue(b *testing.B) {
+	b.Run("BloomFilter", func(b *testing.B) {
 		f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.0001)
 		for _, w := range words {
 			f.Add(bloomHash(w))
 		}
-	}
-}
-
-func BenchmarkInsertBBloom(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			for _, w := range words {
+				f.Contains(bloomHash(w))
+			}
+		}
+	})
+	b.Run("BBloom", func(b *testing.B) {
 		f := bbloom.New(float64(numWords), 0.002)
 		for _, w := range words {
 			f.Add([]byte(w))
 		}
-	}
-}
-
-func BenchmarkInsertSeiflotfyCuckoo(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			for _, w := range words {
+				f.Has([]byte(w))
+			}
+		}
+	})
+	b.Run("SeiflotfyCuckoo", func(b *testing.B) {
 		f := cuckoo.NewFilter(uint(numWords))
 		for _, w := range words {
 			f.Insert([]byte(w))
 		}
-	}
-}
-
-func BenchmarkInsertPanmariCuckoo(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		f := cuckooV2.NewFilter(uint(numWords))
-		for _, w := range words {
-			f.Insert([]byte(w))
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			for _, w := range words {
+				f.Lookup([]byte(w))
+			}
 		}
-	}
-}
-
-func BenchmarkInsertVedhavyasCuckoo(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		f := cuckooVed.NewFilter(uint32(numWords))
-		for _, w := range words {
-			f.Insert([]byte(w))
-		}
-	}
-}
-
-func BenchmarkContainsTrueBloom(b *testing.B) {
-	f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.0001)
-	for _, w := range words {
-		f.Add(bloomHash(w))
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		for _, w := range words {
-			f.Contains(bloomHash(w))
-		}
-	}
-}
-
-func BenchmarkContainsTrueBBloom(b *testing.B) {
-	f := bbloom.New(float64(numWords), 0.002)
-	for _, w := range words {
-		f.Add([]byte(w))
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		for _, w := range words {
-			f.Has([]byte(w))
-		}
-	}
-}
-
-func BenchmarkContainsTrueSeiflotfyCuckoo(b *testing.B) {
-	f := cuckoo.NewFilter(uint(numWords))
-	for _, w := range words {
-		f.Insert([]byte(w))
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		for _, w := range words {
-			f.Lookup([]byte(w))
-		}
-	}
+	})
 }
 
 func BenchmarkContainsTruePanmariCuckoo(b *testing.B) {
