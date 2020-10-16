@@ -55,43 +55,48 @@ func BenchmarkFilters(b *testing.B) {
 
 func insert(b *testing.B) {
 	b.Run("Bloomfilter", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			f, _ := bloomfilter.NewOptimal(uint64(numWords), 0.0001)
 			for _, w := range words[:numWords] {
 				f.Add(bloomHash(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("BBloom", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			f := bbloom.New(float64(numWords), 0.002)
 			for _, w := range words[:numWords] {
 				f.Add([]byte(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("SeiflotfyCuckoo", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			f := cuckoo.NewFilter(uint(numWords))
 			for _, w := range words[:numWords] {
 				f.Insert([]byte(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("PanmariCuckoo", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			f := cuckooV2.NewFilter(uint(numWords))
 			for _, w := range words[:numWords] {
 				f.Insert([]byte(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("VedhavyasCuckoo", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			f := cuckooVed.NewFilter(uint32(numWords))
 			for _, w := range words[:numWords] {
 				f.Insert([]byte(w))
 			}
+			i += numWords
 		}
 	})
 }
@@ -103,10 +108,11 @@ func containsTrue(b *testing.B) {
 			f.Add(bloomHash(w))
 		}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			for _, w := range words[:numWords] {
 				f.Contains(bloomHash(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("BBloom", func(b *testing.B) {
@@ -115,10 +121,11 @@ func containsTrue(b *testing.B) {
 			f.Add([]byte(w))
 		}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			for _, w := range words[:numWords] {
 				f.Has([]byte(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("SeiflotfyCuckoo", func(b *testing.B) {
@@ -127,10 +134,11 @@ func containsTrue(b *testing.B) {
 			f.Insert([]byte(w))
 		}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			for _, w := range words[:numWords] {
 				f.Lookup([]byte(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("PanmariCuckoo", func(b *testing.B) {
@@ -139,10 +147,11 @@ func containsTrue(b *testing.B) {
 			f.Insert([]byte(w))
 		}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			for _, w := range words[:numWords] {
 				f.Lookup([]byte(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("VedhavyasCuckoo", func(b *testing.B) {
@@ -151,10 +160,11 @@ func containsTrue(b *testing.B) {
 			f.Insert([]byte(w))
 		}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			for _, w := range words[:numWords] {
 				f.Lookup([]byte(w))
 			}
+			i += numWords
 		}
 	})
 }
@@ -166,10 +176,11 @@ func containsFalse(b *testing.B) {
 			f.Add(bloomHash(w))
 		}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			for _, w := range otherWords[:numWords] {
 				f.Contains(bloomHash(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("BBloom", func(b *testing.B) {
@@ -178,10 +189,11 @@ func containsFalse(b *testing.B) {
 			f.Add([]byte(w))
 		}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			for _, w := range otherWords[:numWords] {
 				f.Has([]byte(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("SeiflotfyCuckoo", func(b *testing.B) {
@@ -190,10 +202,11 @@ func containsFalse(b *testing.B) {
 			f.Insert([]byte(w))
 		}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			for _, w := range otherWords[:numWords] {
 				f.Lookup([]byte(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("PanmariCuckoo", func(b *testing.B) {
@@ -202,10 +215,11 @@ func containsFalse(b *testing.B) {
 			f.Insert([]byte(w))
 		}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			for _, w := range otherWords[:numWords] {
 				f.Lookup([]byte(w))
 			}
+			i += numWords
 		}
 	})
 	b.Run("VedhavyasCuckoo", func(b *testing.B) {
@@ -214,10 +228,11 @@ func containsFalse(b *testing.B) {
 			f.Insert([]byte(w))
 		}
 		b.ResetTimer()
-		for i := 0; i < b.N; i++ {
+		for i := 0; i < b.N; {
 			for _, w := range otherWords[:numWords] {
 				f.Lookup([]byte(w))
 			}
+			i += numWords
 		}
 	})
 }
