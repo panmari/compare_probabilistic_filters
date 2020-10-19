@@ -54,7 +54,7 @@ func init() {
 }
 
 func BenchmarkFilters(b *testing.B) {
-	for _, n := range []int{500, 2000, 10000, 50000} {
+	for _, n := range []int{500, 5000, 50000} {
 		b.Run(fmt.Sprintf("size=%d", n), func(b *testing.B) {
 			if n > maxNumWords {
 				b.Fatalf("Num words too large: %d > %d", n, maxNumWords)
