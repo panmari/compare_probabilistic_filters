@@ -12,6 +12,7 @@ import (
 
 	"github.com/AndreasBriese/bbloom"
 	"github.com/irfansharif/cfilter"
+	cuckooLin "github.com/linvon/cuckoo-filter"
 	cuckooV2 "github.com/panmari/cuckoofilter"
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/steakknife/bloomfilter"
@@ -48,21 +49,27 @@ func main() {
 		}, {
 			"vedhavyas/cuckoo-filter",
 			testCuckoofilterVed,
+		}, {
+			"linvon/cuckoo-filter",
+			testCuckoofilterLin,
 		},
-		// {
-		// 	// panic: runtime error: index out of range
-		// 	"irfansharif/cfilter",
-		// 	testCfilter,
-		// },
+		{
+			// panic: runtime error: index out of range
+			"irfansharif/cfilter",
+			testCfilter,
+		},
 	}
+	// for _, size := range []int{10, 50, 100, 150, 200, 250, 300, 350, 400, 450} {
+	// *wordListMultiplier = size
 	for _, tc := range testCases {
 		stats := tc.testFilter(words)
 		fpRate := float64(stats.fp) / (float64(stats.fp + stats.tn))
 		const megabyte = 1 << 20
 		memMB := float64(stats.mem) / float64(megabyte)
 		fmt.Printf("%s: size=%d, mem=%.3f MB, insertFailed=%d, fn=%d, fp=%d, fp_rate=%f\n",
-			tc.name, len(words), memMB, stats.insertFailed, stats.fn, stats.fp, fpRate)
+			tc.name, filterSize(words), memMB, stats.insertFailed, stats.fn, stats.fp, fpRate)
 	}
+	// }
 }
 
 type filterStats struct {
@@ -128,6 +135,16 @@ func testCfilter(words []string) filterStats {
 
 	insert := func(s string) bool { return cf.Insert([]byte(s)) }
 	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
+	return testImplementation(words, memBefore, insert, contains)
+}
+
+func testCuckoofilterLin(words []string) filterStats {
+	memBefore := heapAllocs()
+
+	cf := cuckooLin.NewFilter(4, 13, uint(filterSize(words)), cuckooLin.TableTypePacked)
+
+	insert := func(s string) bool { return cf.Add([]byte(s)) }
+	contains := func(s string) bool { return cf.Contain([]byte(s)) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 

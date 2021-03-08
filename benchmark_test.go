@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/AndreasBriese/bbloom"
+	cuckooLin "github.com/linvon/cuckoo-filter"
 	cuckooV2 "github.com/panmari/cuckoofilter"
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/steakknife/bloomfilter"
@@ -114,6 +115,15 @@ func insert(b *testing.B) {
 			i += numWords
 		}
 	})
+	b.Run("LinCuckoo", func(b *testing.B) {
+		for i := 0; i < b.N; {
+			f := cuckooLin.NewFilter(4, 16, uint(numWords), cuckooLin.TableTypeSingle)
+			for _, w := range words[:numWords] {
+				f.Add([]byte(w))
+			}
+			i += numWords
+		}
+	})
 }
 
 func containsTrue(b *testing.B) {
@@ -178,6 +188,19 @@ func containsTrue(b *testing.B) {
 		for i := 0; i < b.N; {
 			for _, w := range words[:numWords] {
 				f.Lookup([]byte(w))
+			}
+			i += numWords
+		}
+	})
+	b.Run("LinCuckoo", func(b *testing.B) {
+		f := cuckooLin.NewFilter(4, 16, uint(numWords), cuckooLin.TableTypeSingle)
+		for _, w := range words[:numWords] {
+			f.Add([]byte(w))
+		}
+		b.ResetTimer()
+		for i := 0; i < b.N; {
+			for _, w := range words[:numWords] {
+				f.Contain([]byte(w))
 			}
 			i += numWords
 		}
@@ -250,6 +273,19 @@ func containsFalse(b *testing.B) {
 			i += numWords
 		}
 	})
+	b.Run("LinCuckoo", func(b *testing.B) {
+		f := cuckooLin.NewFilter(4, 16, uint(numWords), cuckooLin.TableTypeSingle)
+		for _, w := range words[:numWords] {
+			f.Add([]byte(w))
+		}
+		b.ResetTimer()
+		for i := 0; i < b.N; {
+			for _, w := range otherWords[:numWords] {
+				f.Contain([]byte(w))
+			}
+			i += numWords
+		}
+	})
 }
 
 func containsMixed(b *testing.B) {
@@ -314,6 +350,19 @@ func containsMixed(b *testing.B) {
 		for i := 0; i < b.N; {
 			for _, w := range mixedWords[:numWords] {
 				f.Lookup([]byte(w))
+			}
+			i += numWords
+		}
+	})
+	b.Run("LinCuckoo", func(b *testing.B) {
+		f := cuckooLin.NewFilter(4, 16, uint(numWords), cuckooLin.TableTypeSingle)
+		for _, w := range words[:numWords] {
+			f.Add([]byte(w))
+		}
+		b.ResetTimer()
+		for i := 0; i < b.N; {
+			for _, w := range mixedWords[:numWords] {
+				f.Contain([]byte(w))
 			}
 			i += numWords
 		}
