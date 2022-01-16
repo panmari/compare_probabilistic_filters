@@ -99,7 +99,7 @@ func insert(b *testing.B) {
 	})
 	b.Run("PanmariCuckoo", func(b *testing.B) {
 		for i := 0; i < b.N; {
-			f := cuckooV2.NewFilter(uint(numWords))
+			f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: cuckooV2.Low})
 			for _, w := range words[:numWords] {
 				f.Insert([]byte(w))
 			}
@@ -167,7 +167,7 @@ func containsTrue(b *testing.B) {
 		}
 	})
 	b.Run("PanmariCuckoo", func(b *testing.B) {
-		f := cuckooV2.NewFilter(uint(numWords))
+		f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: cuckooV2.Low})
 		for _, w := range words[:numWords] {
 			f.Insert([]byte(w))
 		}
@@ -248,7 +248,7 @@ func containsFalse(b *testing.B) {
 		}
 	})
 	b.Run("PanmariCuckoo", func(b *testing.B) {
-		f := cuckooV2.NewFilter(uint(numWords))
+		f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: cuckooV2.Low})
 		for _, w := range words[:numWords] {
 			f.Insert([]byte(w))
 		}
@@ -329,7 +329,7 @@ func containsMixed(b *testing.B) {
 		}
 	})
 	b.Run("PanmariCuckoo", func(b *testing.B) {
-		f := cuckooV2.NewFilter(uint(numWords))
+		f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: cuckooV2.Low})
 		for _, w := range words[:numWords] {
 			f.Insert([]byte(w))
 		}

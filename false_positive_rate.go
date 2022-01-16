@@ -34,29 +34,31 @@ func main() {
 		{
 			"steakknife/bloomfilter",
 			testBloomfilter,
-		},
-		{
+		}, {
 			"AndreasBriese/bbloom",
 			testBbloom,
-		},
-		{
+		}, {
 			"seiflotfy/cuckoofilter",
 			testCuckoofilter,
-		},
-		{
+		}, {
 			"panmari/cuckoofilter",
 			testCuckoofilterV2,
+		}, {
+			"panmari/cuckoofilter/low",
+			testCuckoofilterV2Low,
 		}, {
 			"vedhavyas/cuckoo-filter",
 			testCuckoofilterVed,
 		}, {
-			"linvon/cuckoo-filter",
-			testCuckoofilterLin,
-		},
-		{
-			// panic: runtime error: index out of range
-			"irfansharif/cfilter",
-			testCfilter,
+			"linvon/cuckoo-filter/single",
+			testCuckoofilterLinSingle,
+		},  {
+			"linvon/cuckoo-filter/packed",
+			testCuckoofilterLinPacked,
+		// }, {
+		// 	// panic: runtime error: index out of range
+		// 	"irfansharif/cfilter",
+		// 	testCfilter,
 		},
 	}
 	// for _, size := range []int{10, 50, 100, 150, 200, 250, 300, 350, 400, 450} {
@@ -112,7 +114,19 @@ func testCuckoofilter(words []string) filterStats {
 
 func testCuckoofilterV2(words []string) filterStats {
 	memBefore := heapAllocs()
-	cf := cuckooV2.NewFilter(uint(filterSize(words)))
+	cf := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(filterSize(words))})
+
+	insert := func(s string) bool { return cf.Insert([]byte(s)) }
+	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
+	return testImplementation(words, memBefore, insert, contains)
+}
+
+func testCuckoofilterV2Low(words []string) filterStats {
+	memBefore := heapAllocs()
+	cf := cuckooV2.NewFilter(cuckooV2.Config{
+		NumElements: uint(filterSize(words)),
+		Precision: cuckooV2.Low,
+	})
 
 	insert := func(s string) bool { return cf.Insert([]byte(s)) }
 	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
@@ -138,9 +152,19 @@ func testCfilter(words []string) filterStats {
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCuckoofilterLin(words []string) filterStats {
+func testCuckoofilterLinSingle(words []string) filterStats {
 	memBefore := heapAllocs()
+	cf := cuckooLin.NewFilter(4, 16, uint(filterSize(words)), cuckooLin.TableTypeSingle)
 
+	insert := func(s string) bool { return cf.Add([]byte(s)) }
+	contains := func(s string) bool { return cf.Contain([]byte(s)) }
+	return testImplementation(words, memBefore, insert, contains)
+}
+
+
+
+func testCuckoofilterLinPacked(words []string) filterStats {
+	memBefore := heapAllocs()
 	cf := cuckooLin.NewFilter(4, 13, uint(filterSize(words)), cuckooLin.TableTypePacked)
 
 	insert := func(s string) bool { return cf.Add([]byte(s)) }
