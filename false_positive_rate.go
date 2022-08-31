@@ -29,7 +29,7 @@ func main() {
 
 	testCases := []struct {
 		name       string
-		testFilter func([]string) filterStats
+		testFilter func([][]byte) filterStats
 	}{
 		{
 			"steakknife/bloomfilter",
@@ -78,108 +78,108 @@ type filterStats struct {
 	insertFailed, tp, fp, tn, fn, mem int64
 }
 
-func filterSize(words []string) int {
+func filterSize(words [][]byte) int {
 	return len(words) * (*wordListMultiplier + 1)
 }
 
-func testBloomfilter(words []string) filterStats {
+func testBloomfilter(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 	bf, err := bloomfilter.NewOptimal(uint64(filterSize(words)), 0.0001)
 	if err != nil {
 		log.Fatalf("failed creating bloom filter with size %d: %v", len(words), err)
 	}
 
-	insert := func(s string) bool { bf.Add(bloomHash(s)); return true }
-	contains := func(s string) bool { return bf.Contains(bloomHash(s)) }
+	insert := func(b []byte) bool { bf.Add(bloomHash(b)); return true }
+	contains := func(b []byte) bool { return bf.Contains(bloomHash(b)) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testBbloom(words []string) filterStats {
+func testBbloom(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 	bf := bbloom.New(float64(filterSize(words)), 0.002)
 
-	insert := func(s string) bool { bf.Add([]byte(s)); return true }
-	contains := func(s string) bool { return bf.Has([]byte(s)) }
+	insert := func(b []byte) bool { bf.Add(b); return true }
+	contains := func(b []byte) bool { return bf.Has(b) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCuckoofilter(words []string) filterStats {
+func testCuckoofilter(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 	cf := cuckoo.NewFilter(uint(filterSize(words)))
 
-	insert := func(s string) bool { return cf.Insert([]byte(s)) }
-	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
+	insert := func(b []byte) bool { return cf.Insert(b) }
+	contains := func(b []byte) bool { return cf.Lookup(b) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCuckoofilterV2(words []string) filterStats {
+func testCuckoofilterV2(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 	cf := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(filterSize(words))})
 
-	insert := func(s string) bool { return cf.Insert([]byte(s)) }
-	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
+	insert := func(b []byte) bool { return cf.Insert(b) }
+	contains := func(b []byte) bool { return cf.Lookup(b) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCuckoofilterV2Low(words []string) filterStats {
+func testCuckoofilterV2Low(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 	cf := cuckooV2.NewFilter(cuckooV2.Config{
 		NumElements: uint(filterSize(words)),
 		Precision: cuckooV2.Low,
 	})
 
-	insert := func(s string) bool { return cf.Insert([]byte(s)) }
-	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
+	insert := func(b []byte) bool { return cf.Insert(b) }
+	contains := func(b []byte) bool { return cf.Lookup(b) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCuckoofilterVed(words []string) filterStats {
+func testCuckoofilterVed(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 	cf := cuckooVed.NewFilter(uint32(filterSize(words)))
 
-	insert := func(s string) bool { return cf.Insert([]byte(s)) }
-	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
+	insert := func(b []byte) bool { return cf.Insert(b) }
+	contains := func(b []byte) bool { return cf.Lookup(b) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCfilter(words []string) filterStats {
+func testCfilter(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 
 	cf := cfilter.New(cfilter.Size(uint(filterSize(words))))
 
-	insert := func(s string) bool { return cf.Insert([]byte(s)) }
-	contains := func(s string) bool { return cf.Lookup([]byte(s)) }
+	insert := func(b []byte) bool { return cf.Insert(b) }
+	contains := func(b []byte) bool { return cf.Lookup(b) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCuckoofilterLinSingle(words []string) filterStats {
+func testCuckoofilterLinSingle(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 	cf := cuckooLin.NewFilter(4, 16, uint(filterSize(words)), cuckooLin.TableTypeSingle)
 
-	insert := func(s string) bool { return cf.Add([]byte(s)) }
-	contains := func(s string) bool { return cf.Contain([]byte(s)) }
+	insert := func(b []byte) bool { return cf.Add(b) }
+	contains := func(b []byte) bool { return cf.Contain(b) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 
 
 
-func testCuckoofilterLinPacked(words []string) filterStats {
+func testCuckoofilterLinPacked(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 	cf := cuckooLin.NewFilter(4, 13, uint(filterSize(words)), cuckooLin.TableTypePacked)
 
-	insert := func(s string) bool { return cf.Add([]byte(s)) }
-	contains := func(s string) bool { return cf.Contain([]byte(s)) }
+	insert := func(b []byte) bool { return cf.Add(b) }
+	contains := func(b []byte) bool { return cf.Contain(b) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testImplementation(words []string, memBefore uint64,
-	insert func(string) bool, contains func(string) bool) (stats filterStats) {
+func testImplementation(words [][]byte, memBefore uint64,
+	insert func([]byte) bool, contains func([]byte) bool) (stats filterStats) {
 	skip := func(i, j int) bool { return (i+j)%200 == 0 }
 	for i, w1 := range words {
 		insert(w1)
 		for j, w2 := range append(words[0:*wordListMultiplier]) {
 			if !skip(i, j) {
-				w := w1 + w2
+				w := append(w1, w2...)
 				if ok := insert(w); !ok {
 					stats.insertFailed++
 				}
@@ -191,10 +191,10 @@ func testImplementation(words []string, memBefore uint64,
 
 	// Construct non-contained words in a second step in order to not influence
 	// memory measurement above.
-	remaining := make([]string, 0, len(words)/200)
+	remaining := make([][]byte, 0, len(words)/200)
 	for i, w1 := range words {
 		for j, w2 := range words[0:*wordListMultiplier] {
-			w := w1 + w2
+			w := append(w1, w2...)
 			if skip(i, j) {
 				remaining = append(remaining, w)
 			}
@@ -218,7 +218,7 @@ func testImplementation(words []string, memBefore uint64,
 	return stats
 }
 
-func readWords() []string {
+func readWords() [][]byte {
 	file, err := os.Open("/usr/share/dict/words")
 	if err != nil {
 		log.Fatal(err)
@@ -226,9 +226,9 @@ func readWords() []string {
 
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
-	var words []string
+	var words [][]byte
 	for scanner.Scan() {
-		words = append(words, scanner.Text())
+		words = append(words, scanner.Bytes())
 	}
 	return words
 }
@@ -240,8 +240,8 @@ func heapAllocs() uint64 {
 	return m.HeapAlloc
 }
 
-func bloomHash(s string) hash.Hash64 {
+func bloomHash(b []byte) hash.Hash64 {
 	h := fnv.New64()
-	h.Write([]byte(s))
+	h.Write(b)
 	return h
 }
