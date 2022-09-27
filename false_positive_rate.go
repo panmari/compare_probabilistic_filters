@@ -17,6 +17,7 @@ import (
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/steakknife/bloomfilter"
 	cuckooVed "github.com/vedhavyas/cuckoo-filter"
+	"golang.org/x/exp/slices"
 )
 
 // Inserts the size of wordlist times this items into the filters.
@@ -52,13 +53,13 @@ func main() {
 		}, {
 			"linvon/cuckoo-filter/single",
 			testCuckoofilterLinSingle,
-		},  {
+		}, {
 			"linvon/cuckoo-filter/packed",
 			testCuckoofilterLinPacked,
-		// }, {
-		// 	// panic: runtime error: index out of range
-		// 	"irfansharif/cfilter",
-		// 	testCfilter,
+			// }, {
+			// 	// panic: runtime error: index out of range
+			// 	"irfansharif/cfilter",
+			// 	testCfilter,
 		},
 	}
 	// for _, size := range []int{10, 50, 100, 150, 200, 250, 300, 350, 400, 450} {
@@ -125,7 +126,7 @@ func testCuckoofilterV2Low(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 	cf := cuckooV2.NewFilter(cuckooV2.Config{
 		NumElements: uint(filterSize(words)),
-		Precision: cuckooV2.Low,
+		Precision:   cuckooV2.Low,
 	})
 
 	insert := func(b []byte) bool { return cf.Insert(b) }
@@ -161,8 +162,6 @@ func testCuckoofilterLinSingle(words [][]byte) filterStats {
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-
-
 func testCuckoofilterLinPacked(words [][]byte) filterStats {
 	memBefore := heapAllocs()
 	cf := cuckooLin.NewFilter(4, 13, uint(filterSize(words)), cuckooLin.TableTypePacked)
@@ -179,7 +178,9 @@ func testImplementation(words [][]byte, memBefore uint64,
 		insert(w1)
 		for j, w2 := range append(words[0:*wordListMultiplier]) {
 			if !skip(i, j) {
-				w := append(w1, w2...)
+				w := make([]byte, 0, len(w1)+len(w2))
+				w = append(w, w1...)
+				w = append(w, w2...)
 				if ok := insert(w); !ok {
 					stats.insertFailed++
 				}
@@ -228,7 +229,7 @@ func readWords() [][]byte {
 	scanner := bufio.NewScanner(file)
 	var words [][]byte
 	for scanner.Scan() {
-		words = append(words, scanner.Bytes())
+		words = append(words, slices.Clone(scanner.Bytes()))
 	}
 	return words
 }
