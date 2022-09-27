@@ -23,7 +23,7 @@ import (
 var (
 	words      [][]byte // Words contained in filter.
 	otherWords [][]byte // Words NOT contained in filter.
-	mixedWords [][]byte	 // Mix of words that are contained/not contained.
+	mixedWords [][]byte // Mix of words that are contained/not contained.
 	numWords   = 500
 )
 
@@ -100,8 +100,8 @@ func insert(b *testing.B) {
 		}
 	})
 	for _, precision := range []cuckooV2.FilterPrecision{cuckooV2.Low, cuckooV2.Medium} {
-		b.Run("PanmariCuckoo/" + fmt.Sprint(precision), func(b *testing.B) {
-			for i := 0; i < b.N; { 
+		b.Run("PanmariCuckoo/"+fmt.Sprint(precision), func(b *testing.B) {
+			for i := 0; i < b.N; {
 				f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: precision})
 				for _, w := range words[:numWords] {
 					f.Insert(w)
@@ -109,7 +109,7 @@ func insert(b *testing.B) {
 				i += numWords
 			}
 		})
-	}	
+	}
 	b.Run("VedhavyasCuckoo", func(b *testing.B) {
 		for i := 0; i < b.N; {
 			f := cuckooVed.NewFilter(uint32(numWords))
@@ -171,12 +171,12 @@ func containsTrue(b *testing.B) {
 		}
 	})
 	for _, precision := range []cuckooV2.FilterPrecision{cuckooV2.Low, cuckooV2.Medium} {
-		b.Run("PanmariCuckoo/" + fmt.Sprint(precision), func(b *testing.B) {
+		b.Run("PanmariCuckoo/"+fmt.Sprint(precision), func(b *testing.B) {
 			f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: precision})
 			for _, w := range words[:numWords] {
 				f.Insert(w)
 			}
-			if err := os.WriteFile("/tmp/" + strings.ReplaceAll(b.Name(), "/", "_"), f.Encode(), 0644); err != nil {
+			if err := os.WriteFile("/tmp/"+strings.ReplaceAll(b.Name(), "/", "_"), f.Encode(), 0644); err != nil {
 				b.Error(err)
 			}
 
