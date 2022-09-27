@@ -1,11 +1,21 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
+
+func wordsToString(words [][]byte) string {
+	var sb strings.Builder
+	for _, w := range words {
+		sb.WriteString(string(w))
+		sb.WriteRune(',')
+	}
+	return sb.String()
+}
 
 func TestTestImplementation(t *testing.T) {
 	*wordListMultiplier = 2
@@ -30,6 +40,7 @@ func TestTestImplementation(t *testing.T) {
 		cmp.AllowUnexported(filterStats{}),
 		cmpopts.IgnoreFields(filterStats{}, "mem")) {
 		t.Errorf("testImplementation got %v, want %v", got, want)
-		t.Logf("Inserted: %v", inserted)
+		t.Logf("Words: %s", wordsToString(words))
+		t.Logf("Inserted: %s", wordsToString(inserted))
 	}
 }
