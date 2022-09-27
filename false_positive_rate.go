@@ -195,10 +195,13 @@ func testImplementation(words [][]byte, memBefore uint64,
 	remaining := make([][]byte, 0, len(words)/200)
 	for i, w1 := range words {
 		for j, w2 := range words[0:*wordListMultiplier] {
-			w := append(w1, w2...)
-			if skip(i, j) {
-				remaining = append(remaining, w)
+			if !skip(i, j) {
+				continue
 			}
+			w := make([]byte, 0, len(w1)+len(w2))
+			w = append(w, w1...)
+			w = append(w, w2...)
+			remaining = append(remaining, w)
 		}
 	}
 
