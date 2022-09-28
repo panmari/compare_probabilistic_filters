@@ -120,13 +120,24 @@ func insert(b *testing.B) {
 		}
 	})
 	b.Run("LinCuckoo", func(b *testing.B) {
-		for i := 0; i < b.N; {
-			f := cuckooLin.NewFilter(4, 16, uint(numWords), cuckooLin.TableTypeSingle)
-			for _, w := range words[:numWords] {
-				f.Add(w)
+		b.Run("single", func(b *testing.B) {
+			for i := 0; i < b.N; {
+				f := cuckooLin.NewFilter(4, 16, uint(numWords), cuckooLin.TableTypeSingle)
+				for _, w := range words[:numWords] {
+					f.Add(w)
+				}
+				i += numWords
 			}
-			i += numWords
-		}
+		})
+		b.Run("packed", func(b *testing.B) {
+			for i := 0; i < b.N; {
+				f := cuckooLin.NewFilter(4, 13, uint(numWords), cuckooLin.TableTypePacked)
+				for _, w := range words[:numWords] {
+					f.Add(w)
+				}
+				i += numWords
+			}
+		})
 	})
 }
 
@@ -203,17 +214,32 @@ func containsTrue(b *testing.B) {
 		}
 	})
 	b.Run("LinCuckoo", func(b *testing.B) {
-		f := cuckooLin.NewFilter(4, 16, uint(numWords), cuckooLin.TableTypeSingle)
-		for _, w := range words[:numWords] {
-			f.Add(w)
-		}
-		b.ResetTimer()
-		for i := 0; i < b.N; {
+		b.Run("single", func(b *testing.B) {
+			f := cuckooLin.NewFilter(4, 16, uint(numWords), cuckooLin.TableTypeSingle)
 			for _, w := range words[:numWords] {
-				f.Contain(w)
+				f.Add(w)
 			}
-			i += numWords
-		}
+			b.ResetTimer()
+			for i := 0; i < b.N; {
+				for _, w := range words[:numWords] {
+					f.Contain(w)
+				}
+				i += numWords
+			}
+		})
+		b.Run("packed", func(b *testing.B) {
+			f := cuckooLin.NewFilter(4, 13, uint(numWords), cuckooLin.TableTypePacked)
+			for _, w := range words[:numWords] {
+				f.Add(w)
+			}
+			b.ResetTimer()
+			for i := 0; i < b.N; {
+				for _, w := range words[:numWords] {
+					f.Contain(w)
+				}
+				i += numWords
+			}
+		})
 	})
 }
 
@@ -365,16 +391,31 @@ func containsMixed(b *testing.B) {
 		}
 	})
 	b.Run("LinCuckoo", func(b *testing.B) {
-		f := cuckooLin.NewFilter(4, 16, uint(numWords), cuckooLin.TableTypeSingle)
-		for _, w := range words[:numWords] {
-			f.Add(w)
-		}
-		b.ResetTimer()
-		for i := 0; i < b.N; {
-			for _, w := range mixedWords[:numWords] {
-				f.Contain(w)
+		b.Run("single", func(b *testing.B) {
+			f := cuckooLin.NewFilter(4, 16, uint(numWords), cuckooLin.TableTypeSingle)
+			for _, w := range words[:numWords] {
+				f.Add(w)
 			}
-			i += numWords
-		}
+			b.ResetTimer()
+			for i := 0; i < b.N; {
+				for _, w := range mixedWords[:numWords] {
+					f.Contain(w)
+				}
+				i += numWords
+			}
+		})
+		b.Run("packed", func(b *testing.B) {
+			f := cuckooLin.NewFilter(4, 13, uint(numWords), cuckooLin.TableTypePacked)
+			for _, w := range words[:numWords] {
+				f.Add(w)
+			}
+			b.ResetTimer()
+			for i := 0; i < b.N; {
+				for _, w := range mixedWords[:numWords] {
+					f.Contain(w)
+				}
+				i += numWords
+			}
+		})
 	})
 }
