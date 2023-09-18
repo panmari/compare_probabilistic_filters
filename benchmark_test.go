@@ -41,8 +41,8 @@ func initWords() error {
 	for i := 0; i < maxNumWords && scanner.Scan(); i++ {
 		otherWords = append(otherWords, scanner.Bytes())
 	}
-	if readWords := len(words) + len(otherWords); readWords < 2*maxNumWords {
-		return fmt.Errorf("Not enough words in wordlist, want at least %d words, got %d\n", 2*maxNumWords, readWords)
+	if numWords := len(words) + len(otherWords); numWords < 2*maxNumWords {
+		return fmt.Errorf("Not enough words in wordlist, want at least %d words, got %d\n", 2*maxNumWords, numWords)
 	}
 	r := rand.New(rand.NewSource(0))
 	wordsIndex := 0
