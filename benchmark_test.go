@@ -29,11 +29,10 @@ var (
 
 const maxNumWords = 50000
 
-func init() {
-	fd, err := os.Open("/usr/share/dict/words")
+func initWords() error {
+	fd, err := os.Open(*wordListPath)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		return fmt.Errorf("Failed reading %q: %v", *wordListPath, err)
 	}
 	scanner := bufio.NewScanner(fd)
 	for i := 0; i < maxNumWords && scanner.Scan(); i++ {
@@ -41,6 +40,9 @@ func init() {
 	}
 	for i := 0; i < maxNumWords && scanner.Scan(); i++ {
 		otherWords = append(otherWords, scanner.Bytes())
+	}
+	if readWords := len(words) + len(otherWords); readWords < 2*maxNumWords {
+		return fmt.Errorf("Not enough words in wordlist, want at least %d words, got %d\n", 2*maxNumWords, readWords)
 	}
 	r := rand.New(rand.NewSource(0))
 	wordsIndex := 0
@@ -54,9 +56,13 @@ func init() {
 		mixedWords = append(mixedWords, otherWords[otherWordsIndex])
 		otherWordsIndex++
 	}
+	return nil
 }
 
 func BenchmarkFilters(b *testing.B) {
+	if err := initWords(); err != nil {
+		b.Fatalf("Failed initializing words: %v", err)
+	}
 	for _, n := range []int{500, 5000, 50000} {
 		b.Run(fmt.Sprintf("size=%d", n), func(b *testing.B) {
 			if n > maxNumWords {
