@@ -23,6 +23,7 @@ import (
 // Inserts the size of wordlist times this items into the filters.
 var (
 	wordListMultiplier = flag.Int("word_list_multiplier", 250, "Determines the number of inserted items.")
+	wordListPath       = flag.String("word_list_path", "/usr/share/dict/words", "Path to list with words")
 )
 
 func main() {
@@ -223,7 +224,7 @@ func testImplementation(words [][]byte, memBefore uint64,
 }
 
 func readWords() [][]byte {
-	file, err := os.Open("/usr/share/dict/words")
+	file, err := os.Open(*wordListPath)
 	if err != nil {
 		log.Fatal(err)
 	}
