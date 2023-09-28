@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"hash"
@@ -175,9 +176,7 @@ func testImplementation(words [][]byte, memBefore uint64,
 	for i, w1 := range words {
 		for j, w2 := range words[0:*wordListMultiplier] {
 			if !skip(i, j) {
-				w := make([]byte, 0, len(w1)+len(w2))
-				w = append(w, w1...)
-				w = append(w, w2...)
+				w := bytes.Join([][]byte{w1, w2}, []byte{})
 				if ok := insert(w); !ok {
 					stats.insertFailed++
 				}
@@ -195,9 +194,7 @@ func testImplementation(words [][]byte, memBefore uint64,
 			if !skip(i, j) {
 				continue
 			}
-			w := make([]byte, 0, len(w1)+len(w2))
-			w = append(w, w1...)
-			w = append(w, w2...)
+			w := bytes.Join([][]byte{w1, w2}, []byte{})
 			remaining = append(remaining, w)
 		}
 	}
