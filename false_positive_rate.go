@@ -22,7 +22,7 @@ import (
 
 // Inserts the size of wordlist times this items into the filters.
 var (
-	wordListMultiplier = flag.Int("word_list_multiplier", 250, "Determines the number of inserted items.")
+	wordListMultiplier = flag.Int("word_list_multiplier", 250, "Determines the number of inserted items. Word list length times this multiplier entries are inserted.")
 	wordListPath       = flag.String("word_list_path", "/usr/share/dict/words", "Path to list with words")
 )
 
@@ -63,8 +63,6 @@ func main() {
 			// 	testCfilter,
 		},
 	}
-	// for _, size := range []int{10, 50, 100, 150, 200, 250, 300, 350, 400, 450} {
-	// *wordListMultiplier = size
 	for _, tc := range testCases {
 		stats := tc.testFilter(words)
 		fpRate := float64(stats.fp) / (float64(stats.fp + stats.tn))
@@ -73,7 +71,6 @@ func main() {
 		fmt.Printf("%s: size=%d, mem=%.3f MB, insertFailed=%d, fn=%d, fp=%d, fp_rate=%f\n",
 			tc.name, filterSize(words), memMB, stats.insertFailed, stats.fn, stats.fp, fpRate)
 	}
-	// }
 }
 
 type filterStats struct {
@@ -81,7 +78,7 @@ type filterStats struct {
 }
 
 func filterSize(words [][]byte) int {
-	return len(words) * (*wordListMultiplier + 1)
+	return *wordListMultiplier * len(words)
 }
 
 func testBloomfilter(words [][]byte) filterStats {
@@ -176,8 +173,7 @@ func testImplementation(words [][]byte, memBefore uint64,
 	insert func([]byte) bool, contains func([]byte) bool) (stats filterStats) {
 	skip := func(i, j int) bool { return (i+j)%200 == 0 }
 	for i, w1 := range words {
-		insert(w1)
-		for j, w2 := range append(words[0:*wordListMultiplier]) {
+		for j, w2 := range words[0:*wordListMultiplier] {
 			if !skip(i, j) {
 				w := make([]byte, 0, len(w1)+len(w2))
 				w = append(w, w1...)
