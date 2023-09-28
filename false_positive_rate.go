@@ -14,6 +14,7 @@ import (
 	"github.com/AndreasBriese/bbloom"
 	"github.com/irfansharif/cfilter"
 	cuckooLin "github.com/linvon/cuckoo-filter"
+	cuckooLk "github.com/livekit/cuckoofilter"
 	cuckooV2 "github.com/panmari/cuckoofilter"
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/steakknife/bloomfilter"
@@ -49,6 +50,9 @@ func main() {
 		}, {
 			"panmari/cuckoofilter/low",
 			testCuckoofilterV2Low,
+		}, {
+			"livekit/cuckoofilter",
+			testCuckoofilterLk,
 		}, {
 			"vedhavyas/cuckoo-filter",
 			testCuckoofilterVed,
@@ -127,6 +131,15 @@ func testCuckoofilterV2Low(words [][]byte) filterStats {
 		NumElements: uint(filterSize(words)),
 		Precision:   cuckooV2.Low,
 	})
+
+	insert := func(b []byte) bool { return cf.Insert(b) }
+	contains := func(b []byte) bool { return cf.Lookup(b) }
+	return testImplementation(words, memBefore, insert, contains)
+}
+
+func testCuckoofilterLk(words [][]byte) filterStats {
+	memBefore := heapAllocs()
+	cf := cuckooLk.NewFilter(uint(filterSize(words)))
 
 	insert := func(b []byte) bool { return cf.Insert(b) }
 	contains := func(b []byte) bool { return cf.Lookup(b) }

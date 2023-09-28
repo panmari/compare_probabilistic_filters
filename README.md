@@ -17,14 +17,15 @@ offer to configure a target false positive rate (e.g. `bloomfilter.NewOptimal(ma
 Results for `wordListMultiplier = 250`:
 
 ```bash
-steakknife/bloomfilter: size=25796274, mem=58.958 MB, insertFailed=0, fn=0, fp=10, fp_rate=0.000078
-AndreasBriese/bbloom: size=25796274, mem=63.999 MB, insertFailed=0, fn=0, fp=9, fp_rate=0.000070
-seiflotfy/cuckoofilter: size=25796274, mem=31.999 MB, insertFailed=0, fn=0, fp=2954, fp_rate=0.022998
-panmari/cuckoofilter: size=25796274, mem=63.999 MB, insertFailed=0, fn=0, fp=10, fp_rate=0.000078
-panmari/cuckoofilter/low: size=25796274, mem=31.999 MB, insertFailed=0, fn=0, fp=3053, fp_rate=0.023768
-vedhavyas/cuckoo-filter: size=25796274, mem=191.999 MB, insertFailed=0, fn=0, fp=783, fp_rate=0.006096
-linvon/cuckoo-filter/single: size=25796274, mem=63.999 MB, insertFailed=0, fn=0, fp=7, fp_rate=0.000054
-linvon/cuckoo-filter/packed: size=25796274, mem=48.140 MB, insertFailed=0, fn=0, fp=92, fp_rate=0.000716
+steakknife/bloomfilter: size=41925250, mem=95.818 MB, insertFailed=0, fn=167684, fp=22, fp_rate=0.000105
+AndreasBriese/bbloom: size=41925250, mem=127.998 MB, insertFailed=0, fn=167698, fp=8, fp_rate=0.000038
+seiflotfy/cuckoofilter: size=41925250, mem=63.999 MB, insertFailed=0, fn=164500, fp=4021, fp_rate=0.019184
+panmari/cuckoofilter: size=41925250, mem=127.998 MB, insertFailed=0, fn=167694, fp=16, fp_rate=0.000076
+panmari/cuckoofilter/low: size=41925250, mem=64.000 MB, insertFailed=0, fn=164501, fp=4055, fp_rate=0.019346
+livekit/cuckoofilter: size=41925250, mem=127.998 MB, insertFailed=0, fn=167683, fp=10, fp_rate=0.000048
+vedhavyas/cuckoo-filter: size=41925250, mem=384.002 MB, insertFailed=0, fn=166158, fp=1986, fp_rate=0.009475
+linvon/cuckoo-filter/single: size=41925250, mem=127.998 MB, insertFailed=0, fn=167690, fp=21, fp_rate=0.000100
+linvon/cuckoo-filter/packed: size=41925250, mem=96.139 MB, insertFailed=0, fn=167600, fp=121, fp_rate=0.000577
 ```
 
 ## Runtime performance
