@@ -30,31 +30,46 @@ linvon/cuckoo-filter/packed: size=41925250, mem=96.139 MB, insertFailed=0, fn=16
 
 ## Runtime performance
 
-All benchmarks are for filters with 500 elements.
+All benchmarks are for filters with 50000 elements.
 
 ```
-Filters/size=500/Insert/Bloomfilter-4                348ns ± 5%                                                                                                                      
-Filters/size=500/Insert/BBloom-4                    54.2ns ± 1%                                                                                                                      
-Filters/size=500/Insert/SeiflotfyCuckoo-4           67.6ns ± 1%                                                                                                                      
-Filters/size=500/Insert/PanmariCuckoo-4             77.0ns ± 6%                                                                                                                      
-Filters/size=500/Insert/VedhavyasCuckoo-4            362ns ± 5%                                                                                                                      
-Filters/size=500/Insert/LinCuckoo-4                 77.2ns ± 8%                                                                                                                      
-Filters/size=500/ContainsTrue/Bloomfilter-4          393ns ±21%                                                                                                                      
-Filters/size=500/ContainsTrue/BBloom-4              47.9ns ± 1%                                                                                                                      
-Filters/size=500/ContainsTrue/SeiflotfyCuckoo-4     26.8ns ± 1%                                                                                                                      
-Filters/size=500/ContainsTrue/PanmariCuckoo-4       74.5ns ± 8%                                                                                                                      
-Filters/size=500/ContainsTrue/VedhavyasCuckoo-4      276ns ± 4%                                                                                                                      
-Filters/size=500/ContainsTrue/LinCuckoo-4           50.3ns ± 1%                                                                                                                      
-Filters/size=500/ContainsFalse/Bloomfilter-4         359ns ±13%                                                                                                                      
-Filters/size=500/ContainsFalse/BBloom-4             48.7ns ± 2%                                                                                                                      
-Filters/size=500/ContainsFalse/SeiflotfyCuckoo-4    31.7ns ± 5%                                                                                                                      
-Filters/size=500/ContainsFalse/PanmariCuckoo-4      74.8ns ± 8%                                                                                                                      
-Filters/size=500/ContainsFalse/VedhavyasCuckoo-4     286ns ± 1%                                                                                                                      
-Filters/size=500/ContainsFalse/LinCuckoo-4          72.0ns ± 6%                                                                                                                      
-Filters/size=500/containsMixed/Bloomfilter-4         370ns ±16%                                                                                                                      
-Filters/size=500/containsMixed/BBloom-4             51.9ns ± 8%                                                                                                                      
-Filters/size=500/containsMixed/SeiflotfyCuckoo-4    31.1ns ± 8%                                                                                                                      
-Filters/size=500/containsMixed/PanmariCuckoo-4      77.0ns ± 8%                                                                                                                      
-Filters/size=500/containsMixed/VedhavyasCuckoo-4     284ns ± 4%                                                                                                                      
-Filters/size=500/containsMixed/LinCuckoo-4          63.4ns ± 4%                                                                                                                      
+goos: linux
+goarch: amd64
+pkg: github.com/panmari/compare_probabilistic_filters
+cpu: 12th Gen Intel(R) Core(TM) i7-1265U
+BenchmarkFilters/size=50000/Insert/Bloomfilter-12                        5158182               207.2 ns/op
+BenchmarkFilters/size=50000/Insert/BBloom-12                            29068202                39.98 ns/op
+BenchmarkFilters/size=50000/Insert/SeiflotfyCuckoo-12                    2814543               424.9 ns/op
+BenchmarkFilters/size=50000/Insert/PanmariCuckoo/Low-12                  2798888               439.3 ns/op
+BenchmarkFilters/size=50000/Insert/PanmariCuckoo/Medium-12               2520884               449.9 ns/op
+BenchmarkFilters/size=50000/Insert/LivekitCuckoo-12                      4466452               229.0 ns/op
+BenchmarkFilters/size=50000/Insert/VedhavyasCuckoo-12                    1284637               993.5 ns/op
+BenchmarkFilters/size=50000/Insert/LinCuckoo/single-12                 156161126                 7.360 ns/op
+BenchmarkFilters/size=50000/Insert/LinCuckoo/packed-12                  94140253                12.31 ns/op
+BenchmarkFilters/size=50000/ContainsTrue/Bloomfilter-12                  9112200               130.9 ns/op
+BenchmarkFilters/size=50000/ContainsTrue/BBloom-12                      53032592                22.48 ns/op
+BenchmarkFilters/size=50000/ContainsTrue/SeiflotfyCuckoo-12             57746794                20.80 ns/op
+BenchmarkFilters/size=50000/ContainsTrue/PanmariCuckoo/Low-12           54694581                22.56 ns/op
+BenchmarkFilters/size=50000/ContainsTrue/PanmariCuckoo/Medium-12        53476204                23.82 ns/op
+BenchmarkFilters/size=50000/ContainsTrue/LivekitCuckoo-12              120490034                 9.982 ns/op
+BenchmarkFilters/size=50000/ContainsTrue/VedhavyasCuckoo-12             10348413               122.8 ns/op
+BenchmarkFilters/size=50000/ContainsTrue/LinCuckoo/single-12            42423476                28.94 ns/op
+BenchmarkFilters/size=50000/ContainsTrue/LinCuckoo/packed-12            46023370                26.81 ns/op
+BenchmarkFilters/size=50000/ContainsFalse/Bloomfilter-12                 9116546               134.2 ns/op
+BenchmarkFilters/size=50000/ContainsFalse/BBloom-12                     44878254                26.90 ns/op
+BenchmarkFilters/size=50000/ContainsFalse/SeiflotfyCuckoo-12            56785233                24.66 ns/op
+BenchmarkFilters/size=50000/ContainsFalse/PanmariCuckoo/Low-12          45640098                27.04 ns/op
+BenchmarkFilters/size=50000/ContainsFalse/PanmariCuckoo/Medium-12       44269923                25.85 ns/op
+BenchmarkFilters/size=50000/ContainsFalse/LivekitCuckoo-12              95376951                13.03 ns/op
+BenchmarkFilters/size=50000/ContainsFalse/VedhavyasCuckoo-12             8759331               135.2 ns/op
+BenchmarkFilters/size=50000/ContainsFalse/LinCuckoo-12                  36252099                32.54 ns/op
+BenchmarkFilters/size=50000/containsMixed/Bloomfilter-12                 9289278               134.9 ns/op
+BenchmarkFilters/size=50000/containsMixed/BBloom-12                     46990591                27.80 ns/op
+BenchmarkFilters/size=50000/containsMixed/SeiflotfyCuckoo-12            49834666                24.01 ns/op
+BenchmarkFilters/size=50000/containsMixed/PanmariCuckoo/Low-12          47381558                26.40 ns/op
+BenchmarkFilters/size=50000/containsMixed/PanmariCuckoo/Medium-12       40522986                26.58 ns/op
+BenchmarkFilters/size=50000/containsMixed/LivekitCuckoo-12              96900874                12.65 ns/op
+BenchmarkFilters/size=50000/containsMixed/VedhavyasCuckoo-12             9281860               132.7 ns/op
+BenchmarkFilters/size=50000/containsMixed/LinCuckoo/single-12           35441432                43.59 ns/op
+BenchmarkFilters/size=50000/containsMixed/LinCuckoo/packed-12           24818893                66.44 ns/op  
 ```

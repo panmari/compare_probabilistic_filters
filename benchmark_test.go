@@ -14,6 +14,7 @@ import (
 
 	"github.com/AndreasBriese/bbloom"
 	cuckooLin "github.com/linvon/cuckoo-filter"
+	cuckooLk "github.com/livekit/cuckoofilter"
 	cuckooV2 "github.com/panmari/cuckoofilter"
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/steakknife/bloomfilter"
@@ -57,6 +58,13 @@ func initWords() error {
 		otherWordsIndex++
 	}
 	return nil
+}
+
+func precisionName(p cuckooV2.FilterPrecision) string {
+	if p == cuckooV2.Low {
+		return "Low"
+	}
+	return "Medium"
 }
 
 func BenchmarkFilters(b *testing.B) {
@@ -106,7 +114,7 @@ func insert(b *testing.B) {
 		}
 	})
 	for _, precision := range []cuckooV2.FilterPrecision{cuckooV2.Low, cuckooV2.Medium} {
-		b.Run("PanmariCuckoo/"+fmt.Sprint(precision), func(b *testing.B) {
+		b.Run("PanmariCuckoo/"+precisionName(precision), func(b *testing.B) {
 			for i := 0; i < b.N; {
 				f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: precision})
 				for _, w := range words[:numWords] {
@@ -116,6 +124,15 @@ func insert(b *testing.B) {
 			}
 		})
 	}
+	b.Run("LivekitCuckoo", func(b *testing.B) {
+		for i := 0; i < b.N; {
+			f := cuckooLk.NewFilter(uint(numWords))
+			for _, w := range words[:numWords] {
+				f.Insert(w)
+			}
+			i += numWords
+		}
+	})
 	b.Run("VedhavyasCuckoo", func(b *testing.B) {
 		for i := 0; i < b.N; {
 			f := cuckooVed.NewFilter(uint32(numWords))
@@ -188,7 +205,7 @@ func containsTrue(b *testing.B) {
 		}
 	})
 	for _, precision := range []cuckooV2.FilterPrecision{cuckooV2.Low, cuckooV2.Medium} {
-		b.Run("PanmariCuckoo/"+fmt.Sprint(precision), func(b *testing.B) {
+		b.Run("PanmariCuckoo/"+precisionName(precision), func(b *testing.B) {
 			f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: precision})
 			for _, w := range words[:numWords] {
 				f.Insert(w)
@@ -206,6 +223,19 @@ func containsTrue(b *testing.B) {
 			}
 		})
 	}
+	b.Run("LivekitCuckoo", func(b *testing.B) {
+		f := cuckooLk.NewFilter(uint(numWords))
+		for _, w := range words[:numWords] {
+			f.Insert(w)
+		}
+		b.ResetTimer()
+		for i := 0; i < b.N; {
+			for _, w := range words[:numWords] {
+				runtime.KeepAlive(f.Lookup(w))
+			}
+			i += numWords
+		}
+	})
 	b.Run("VedhavyasCuckoo", func(b *testing.B) {
 		f := cuckooVed.NewFilter(uint32(numWords))
 		for _, w := range words[:numWords] {
@@ -289,8 +319,23 @@ func containsFalse(b *testing.B) {
 			i += numWords
 		}
 	})
-	b.Run("PanmariCuckoo", func(b *testing.B) {
-		f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: cuckooV2.Low})
+	for _, precision := range []cuckooV2.FilterPrecision{cuckooV2.Low, cuckooV2.Medium} {
+		b.Run("PanmariCuckoo/"+precisionName(precision), func(b *testing.B) {
+			f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: precision})
+			for _, w := range words[:numWords] {
+				f.Insert(w)
+			}
+			b.ResetTimer()
+			for i := 0; i < b.N; {
+				for _, w := range otherWords[:numWords] {
+					f.Lookup(w)
+				}
+				i += numWords
+			}
+		})
+	}
+	b.Run("LivekitCuckoo", func(b *testing.B) {
+		f := cuckooLk.NewFilter(uint(numWords))
 		for _, w := range words[:numWords] {
 			f.Insert(w)
 		}
@@ -370,8 +415,23 @@ func containsMixed(b *testing.B) {
 			i += numWords
 		}
 	})
-	b.Run("PanmariCuckoo", func(b *testing.B) {
-		f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: cuckooV2.Low})
+	for _, precision := range []cuckooV2.FilterPrecision{cuckooV2.Low, cuckooV2.Medium} {
+		b.Run("PanmariCuckoo/"+precisionName(precision), func(b *testing.B) {
+			f := cuckooV2.NewFilter(cuckooV2.Config{NumElements: uint(numWords), Precision: precision})
+			for _, w := range words[:numWords] {
+				f.Insert(w)
+			}
+			b.ResetTimer()
+			for i := 0; i < b.N; {
+				for _, w := range mixedWords[:numWords] {
+					f.Lookup(w)
+				}
+				i += numWords
+			}
+		})
+	}
+	b.Run("LivekitCuckoo", func(b *testing.B) {
+		f := cuckooLk.NewFilter(uint(numWords))
 		for _, w := range words[:numWords] {
 			f.Insert(w)
 		}
