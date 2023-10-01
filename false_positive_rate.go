@@ -12,10 +12,10 @@ import (
 	"runtime"
 
 	"github.com/AndreasBriese/bbloom"
-	"github.com/irfansharif/cfilter"
 	cuckooLin "github.com/linvon/cuckoo-filter"
 	cuckooLk "github.com/livekit/cuckoofilter"
 	cuckooV2 "github.com/panmari/cuckoofilter"
+	cuckooLocal "github.com/panmari/cuckoofilter_local"
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/steakknife/bloomfilter"
 	cuckooVed "github.com/vedhavyas/cuckoo-filter"
@@ -51,6 +51,9 @@ func main() {
 			"panmari/cuckoofilter/low",
 			testCuckoofilterV2Low,
 		}, {
+			"panmari/cuckoofilter/fastrand",
+			testCuckoofilterFastrand,
+		}, {
 			"livekit/cuckoofilter",
 			testCuckoofilterLk,
 		}, {
@@ -68,6 +71,8 @@ func main() {
 			// 	testCfilter,
 		},
 	}
+	// for _, size := range []int{10, 50, 100, 150, 200, 250, 300, 350, 400, 450} {
+	// *wordListMultiplier = size
 	for _, tc := range testCases {
 		stats := tc.testFilter(words)
 		fpRate := float64(stats.fp) / (float64(stats.fp + stats.tn))
@@ -76,6 +81,7 @@ func main() {
 		fmt.Printf("%s: size=%d, mem=%.3f MB, insertFailed=%d, fn=%d, fp=%d, fp_rate=%f\n",
 			tc.name, filterSize(words), memMB, stats.insertFailed, stats.fn, stats.fp, fpRate)
 	}
+	// }
 }
 
 type filterStats struct {
@@ -146,19 +152,20 @@ func testCuckoofilterLk(words [][]byte) filterStats {
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCuckoofilterVed(words [][]byte) filterStats {
+func testCuckoofilterFastrand(words [][]byte) filterStats {
 	memBefore := heapAllocs()
-	cf := cuckooVed.NewFilter(uint32(filterSize(words)))
+	cf := cuckooLocal.NewFilter(cuckooLocal.Config{
+		NumElements: uint(filterSize(words)),
+	})
 
 	insert := func(b []byte) bool { return cf.Insert(b) }
 	contains := func(b []byte) bool { return cf.Lookup(b) }
 	return testImplementation(words, memBefore, insert, contains)
 }
 
-func testCfilter(words [][]byte) filterStats {
+func testCuckoofilterVed(words [][]byte) filterStats {
 	memBefore := heapAllocs()
-
-	cf := cfilter.New(cfilter.Size(uint(filterSize(words))))
+	cf := cuckooVed.NewFilter(uint32(filterSize(words)))
 
 	insert := func(b []byte) bool { return cf.Insert(b) }
 	contains := func(b []byte) bool { return cf.Lookup(b) }

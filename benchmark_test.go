@@ -16,6 +16,7 @@ import (
 	cuckooLin "github.com/linvon/cuckoo-filter"
 	cuckooLk "github.com/livekit/cuckoofilter"
 	cuckooV2 "github.com/panmari/cuckoofilter"
+	cuckooLocal "github.com/panmari/cuckoofilter_local"
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/steakknife/bloomfilter"
 	cuckooVed "github.com/vedhavyas/cuckoo-filter"
@@ -71,7 +72,7 @@ func BenchmarkFilters(b *testing.B) {
 	if err := initWords(); err != nil {
 		b.Fatalf("Failed initializing words: %v", err)
 	}
-	for _, n := range []int{500, 5000, 50000} {
+	for _, n := range []int{500, 5000, maxNumWords} {
 		b.Run(fmt.Sprintf("size=%d", n), func(b *testing.B) {
 			if n > maxNumWords {
 				b.Fatalf("Num words too large: %d > %d", n, maxNumWords)
@@ -127,6 +128,17 @@ func insert(b *testing.B) {
 	b.Run("LivekitCuckoo", func(b *testing.B) {
 		for i := 0; i < b.N; {
 			f := cuckooLk.NewFilter(uint(numWords))
+			for _, w := range words[:numWords] {
+				f.Insert(w)
+			}
+			i += numWords
+		}
+	})
+	b.Run("PanmariCuckoo/local", func(b *testing.B) {
+		for i := 0; i < b.N; {
+			f := cuckooLocal.NewFilter(cuckooLocal.Config{
+				NumElements: uint(filterSize(words)),
+			})
 			for _, w := range words[:numWords] {
 				f.Insert(w)
 			}
@@ -236,6 +248,25 @@ func containsTrue(b *testing.B) {
 			i += numWords
 		}
 	})
+	b.Run("PanmariCuckoo/local", func(b *testing.B) {
+		f := cuckooLocal.NewFilter(cuckooLocal.Config{
+			NumElements: uint(filterSize(words)),
+		})
+		for _, w := range words[:numWords] {
+			f.Insert(w)
+		}
+		if err := os.WriteFile("/tmp/"+strings.ReplaceAll(b.Name(), "/", "_"), f.Encode(), 0644); err != nil {
+			b.Error(err)
+		}
+
+		b.ResetTimer()
+		for i := 0; i < b.N; {
+			for _, w := range words[:numWords] {
+				f.Lookup(w)
+			}
+			i += numWords
+		}
+	})
 	b.Run("VedhavyasCuckoo", func(b *testing.B) {
 		f := cuckooVed.NewFilter(uint32(numWords))
 		for _, w := range words[:numWords] {
@@ -334,6 +365,21 @@ func containsFalse(b *testing.B) {
 			}
 		})
 	}
+	b.Run("PanmariCuckoo/local", func(b *testing.B) {
+		f := cuckooLocal.NewFilter(cuckooLocal.Config{
+			NumElements: uint(filterSize(words)),
+		})
+		for _, w := range words[:numWords] {
+			f.Insert(w)
+		}
+		b.ResetTimer()
+		for i := 0; i < b.N; {
+			for _, w := range otherWords[:numWords] {
+				f.Lookup(w)
+			}
+			i += numWords
+		}
+	})
 	b.Run("LivekitCuckoo", func(b *testing.B) {
 		f := cuckooLk.NewFilter(uint(numWords))
 		for _, w := range words[:numWords] {
@@ -430,6 +476,21 @@ func containsMixed(b *testing.B) {
 			}
 		})
 	}
+	b.Run("PanmariCuckoo/local", func(b *testing.B) {
+		f := cuckooLocal.NewFilter(cuckooLocal.Config{
+			NumElements: uint(filterSize(words)),
+		})
+		for _, w := range words[:numWords] {
+			f.Insert(w)
+		}
+		b.ResetTimer()
+		for i := 0; i < b.N; {
+			for _, w := range mixedWords[:numWords] {
+				f.Lookup(w)
+			}
+			i += numWords
+		}
+	})
 	b.Run("LivekitCuckoo", func(b *testing.B) {
 		f := cuckooLk.NewFilter(uint(numWords))
 		for _, w := range words[:numWords] {

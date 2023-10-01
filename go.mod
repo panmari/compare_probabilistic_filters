@@ -9,6 +9,7 @@ require (
 	github.com/linvon/cuckoo-filter v0.4.0
 	github.com/livekit/cuckoofilter v1.1.0
 	github.com/panmari/cuckoofilter v1.0.4-0.20220116144839-ac182fd3f9f3
+	github.com/panmari/cuckoofilter_local v0.0.0
 	github.com/seiflotfy/cuckoofilter v0.0.0-20220411075957-e3b120b3f5fb
 	github.com/steakknife/bloomfilter v0.0.0-20180922174646-6819c0d2a570
 	github.com/vedhavyas/cuckoo-filter v1.6.2
@@ -25,3 +26,4 @@ require (
 )
 
 replace github.com/panmari/cuckoofilter => github.com/panmari/cuckoofilter v1.0.4-0.20220924130152-b9b2432b5494
+replace github.com/panmari/cuckoofilter_local => /home/smoser/cuckoofilter
